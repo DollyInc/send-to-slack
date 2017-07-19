@@ -13,9 +13,20 @@ module.exports = sendToSlack = function(domain, token) {
             'Content-Type': 'text/plain',
             'Content-Length': message.length
             }
-        }, callback);
+        }, function(response) {
+            var body = '';
+            response.on('data', function(chunk) {
+                body += chunk;
+            });
+            response.on('end', function() {
+                callback(null, body);
+            });
+        });
 
         req.write(message);
+        req.on('error', function(e) {
+            callback(e, null);
+        });
         req.end();
     };
 };
